@@ -11,5 +11,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(mini_rdbms
     src/main.cpp
+    src/storage/Constants.hpp
+    src/storage/Row.hpp
+    src/storage/Row.cpp
+    src/storage/Page.hpp
+    src/storage/Page.cpp
+    src/storage/Pager.hpp
+    src/storage/Pager.cpp
 )
 
