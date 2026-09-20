@@ -1,4 +1,17 @@
 build/
+.vscode/
+.idea/
+
+*.o
+*.a
+*.so
+*.exe
+
+*.db
+*.sqlite
+*.sqlite3
+
+.DS_Storebuild/
 data/
 *.db
 *.log
