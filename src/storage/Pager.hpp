@@ -13,7 +13,7 @@ class Pager
 
     bool is_CheckvalPage(const int32_t pageNO) ;
 
-    size_t get_Pages() ;
+   
 
     public:
     Pager(const std::string& filename);
@@ -21,4 +21,6 @@ class Pager
     Page read_Page(int32_t page_No ) ;
 
     void write_Page(const int32_t idx , const Page& page);
+    
+     size_t get_Pages() ;
 };

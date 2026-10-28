@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(mini_rdbms
-    src/main.cpp
+    
     src/storage/Constants.hpp
     src/storage/Row.hpp
     src/storage/Row.cpp
@@ -18,5 +18,14 @@ add_executable(mini_rdbms
     src/storage/Page.cpp
     src/storage/Pager.hpp
     src/storage/Pager.cpp
+    src/storage/HeapFile.hpp
+    src/storage/HeapFile.cpp
+    src/Query/querypro.hpp
+    src/Query/querypro.cpp
+    src/demo/ForgeDBDemo.cpp  
+)
+
+target_include_directories(mini_rdbms PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
 )
 

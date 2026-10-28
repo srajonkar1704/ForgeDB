@@ -11,25 +11,27 @@ class Page
 {
     
     private:
-    static constexpr size_t METADATA = 4;
-    static constexpr size_t ROW_SIZE = 100;
-    static constexpr size_t MAX_ROWS  = (db::PAGE_SIZE - METADATA)/ROW_SIZE ;
-    char data[db::PAGE_SIZE];
-     int32_t get_row_used() const;
 
+    static constexpr size_t MAX_ROWS  = (db::PAGE_SIZE - db::PAGE_METADATA__SIZE)/db::ROW_SIZE ;
+    char data[db::PAGE_SIZE];
+     
+    int32_t row_used() const;
     void set_row_used(const int32_t& row_used);
 
+    void valid_row() const;
 
     public:
     Page();
 
     void insert_row(const Row& row);
 
+    int32_t row_count() const;
+
     Row read_row(const int32_t& idx) const;
     
-    bool isfull()const;
+    bool is_full()const;
 
-    void serializer(char* buffer) const ;
+    void serialize(char* buffer) const ;
 
-    void deserializer(const char* buffer);
+    void deserialize(const char* buffer);
 };

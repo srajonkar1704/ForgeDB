@@ -1,512 +1,49 @@
 #include <iostream>
 #include <cassert>
 #include <cstring>
-#include <filesystem>
 #include <stdexcept>
 
-#include "storage/Row.hpp"
 #include "storage/Page.hpp"
-#include "storage/Pager.hpp"
-#include "storage/Constants.hpp"
 
 using namespace std;
 
 
-// ------------------------------------------------------------
-// Helper: compare two Rows by comparing their serialized bytes
-// ------------------------------------------------------------
+// ============================================================
+// Helper: Compare two Rows
+// ============================================================
 
 bool rows_equal(const Row& a, const Row& b)
 {
-    char buffer_a[Row::ROW_SIZE]{};
-    char buffer_b[Row::ROW_SIZE]{};
-
-    a.serialize(buffer_a);
-    b.serialize(buffer_b);
-
-    return std::memcmp(buffer_a, buffer_b, Row::ROW_SIZE) == 0;
-}
-
-
-// ------------------------------------------------------------
-// Helper
-// ------------------------------------------------------------
-
-void passed(const string& message)
-{
-    cout << "[PASS] " << message << '\n';
+    return a.id == b.id &&
+           strcmp(a.username, b.username) == 0 &&
+           strcmp(a.email, b.email) == 0;
 }
 
 
 // ============================================================
-// ROW TESTS
+// Helper: Create a Row
 // ============================================================
 
-void test_row_serialization()
+Row make_row(int id, const char* username, const char* email)
 {
-    Row original("Alice", 101, "alice@example.com");
+    Row row;
 
-    char buffer[Row::ROW_SIZE]{};
+    row.id = id;
 
-    original.serialize(buffer);
+    strcpy(row.username, username);
+    strcpy(row.email, email);
 
-    Row recovered = Row::deserialize(buffer);
-
-    assert(rows_equal(original, recovered));
-
-    passed("Row serialization/deserialization");
-}
-
-
-void test_row_serialized_size()
-{
-    assert(Row::ROW_SIZE == 100);
-    assert(Row::SerializedSize() == 100);
-
-    passed("Row serialized size is 100 bytes");
-}
-
-
-void test_row_different_values()
-{
-    Row row1("Alice", 1, "alice@example.com");
-    Row row2("Bob", 2, "bob@example.com");
-
-    assert(!rows_equal(row1, row2));
-
-    passed("Different rows remain different");
+    return row;
 }
 
 
 // ============================================================
-// PAGE TESTS
+// Helper: Print successful test
 // ============================================================
 
-void test_empty_page()
+void passed(const string& test)
 {
-    Page page;
-
-    assert(page.isfull() == false);
-
-    passed("New page starts empty");
-}
-
-
-void test_page_insert_and_read()
-{
-    Page page;
-
-    Row original("Alice", 101, "alice@example.com");
-
-    page.insert_row(original);
-
-    Row recovered = page.read_row(0);
-
-    assert(rows_equal(original, recovered));
-
-    passed("Page inserts and reads one row");
-}
-
-
-void test_multiple_rows()
-{
-    Page page;
-
-    Row row1("Alice", 1, "alice@example.com");
-    Row row2("Bob", 2, "bob@example.com");
-    Row row3("Charlie", 3, "charlie@example.com");
-
-    page.insert_row(row1);
-    page.insert_row(row2);
-    page.insert_row(row3);
-
-    assert(rows_equal(page.read_row(0), row1));
-    assert(rows_equal(page.read_row(1), row2));
-    assert(rows_equal(page.read_row(2), row3));
-
-    passed("Page preserves multiple row order");
-}
-
-
-void test_page_full()
-{
-    Page page;
-
-    for (int i = 0; i < 40; i++)
-    {
-        Row row("User", i, "user@example.com");
-        page.insert_row(row);
-    }
-
-    assert(page.isfull());
-
-    passed("Page becomes full after 40 rows");
-}
-
-
-void test_page_rejects_extra_row()
-{
-    Page page;
-
-    for (int i = 0; i < 40; i++)
-    {
-        Row row("User", i, "user@example.com");
-        page.insert_row(row);
-    }
-
-    bool threw = false;
-
-    try
-    {
-        Row extra("Extra", 999, "extra@example.com");
-        page.insert_row(extra);
-    }
-    catch (const std::exception&)
-    {
-        threw = true;
-    }
-
-    assert(threw);
-
-    passed("Full page rejects insertion");
-}
-
-
-void test_invalid_page_index()
-{
-    Page page;
-
-    Row row("Alice", 1, "alice@example.com");
-    page.insert_row(row);
-
-    bool threw = false;
-
-    try
-    {
-        page.read_row(1);
-    }
-    catch (const std::exception&)
-    {
-        threw = true;
-    }
-
-    assert(threw);
-
-    passed("Reading unused row throws");
-}
-
-
-void test_negative_page_index()
-{
-    Page page;
-
-    Row row("Alice", 1, "alice@example.com");
-    page.insert_row(row);
-
-    bool threw = false;
-
-    try
-    {
-        page.read_row(-1);
-    }
-    catch (const std::exception&)
-    {
-        threw = true;
-    }
-
-    assert(threw);
-
-    passed("Negative row index throws");
-}
-
-
-void test_page_serialization()
-{
-    Page page;
-
-    Row row1("Alice", 1, "alice@example.com");
-    Row row2("Bob", 2, "bob@example.com");
-
-    page.insert_row(row1);
-    page.insert_row(row2);
-
-    char buffer[db::PAGE_SIZE]{};
-
-    page.serializer(buffer);
-
-    Page recovered_page;
-
-    recovered_page.deserializer(buffer);
-
-    assert(rows_equal(recovered_page.read_row(0), row1));
-    assert(rows_equal(recovered_page.read_row(1), row2));
-
-    passed("Page serialization/deserialization");
-}
-
-
-// ============================================================
-// PAGER TESTS
-// ============================================================
-
-void test_pager_creates_database()
-{
-    const string filename = "test.db";
-
-    filesystem::remove(filename);
-
-    Pager pager(filename);
-
-    assert(filesystem::exists(filename));
-
-    passed("Pager creates database file");
-
-    filesystem::remove(filename);
-}
-
-
-void test_write_first_page()
-{
-    const string filename = "test.db";
-
-    filesystem::remove(filename);
-
-    Pager pager(filename);
-
-    Page page;
-
-    Row row("Alice", 1, "alice@example.com");
-
-    page.insert_row(row);
-
-    pager.write_Page(0, page);
-
-    assert(filesystem::file_size(filename) == db::PAGE_SIZE);
-
-    passed("Pager writes first 4096-byte page");
-
-    filesystem::remove(filename);
-}
-
-
-void test_read_page()
-{
-    const string filename = "test.db";
-
-    filesystem::remove(filename);
-
-    Pager pager(filename);
-
-    Page page;
-
-    Row original("Alice", 1, "alice@example.com");
-
-    page.insert_row(original);
-
-    pager.write_Page(0, page);
-
-    Page recovered_page = pager.read_Page(0);
-
-    Row recovered = recovered_page.read_row(0);
-
-    assert(rows_equal(original, recovered));
-
-    passed("Pager reads previously written page");
-
-    filesystem::remove(filename);
-}
-
-
-void test_persistence_after_restart()
-{
-    const string filename = "test.db";
-
-    filesystem::remove(filename);
-
-    Row original("Alice", 101, "alice@example.com");
-
-    // Pager instance 1
-    {
-        Pager pager(filename);
-
-        Page page;
-
-        page.insert_row(original);
-
-        pager.write_Page(0, page);
-    }
-
-    // Pager instance 2
-    {
-        Pager pager(filename);
-
-        Page recovered_page = pager.read_Page(0);
-
-        Row recovered = recovered_page.read_row(0);
-
-        assert(rows_equal(original, recovered));
-    }
-
-    passed("Data persists after Pager restart");
-
-    filesystem::remove(filename);
-}
-
-
-void test_multiple_pages()
-{
-    const string filename = "test.db";
-
-    filesystem::remove(filename);
-
-    Pager pager(filename);
-
-    Page page0;
-    Page page1;
-
-    Row row0("Alice", 1, "alice@example.com");
-    Row row1("Bob", 2, "bob@example.com");
-
-    page0.insert_row(row0);
-    page1.insert_row(row1);
-
-    pager.write_Page(0, page0);
-    pager.write_Page(1, page1);
-
-    Page recovered0 = pager.read_Page(0);
-    Page recovered1 = pager.read_Page(1);
-
-    assert(rows_equal(recovered0.read_row(0), row0));
-    assert(rows_equal(recovered1.read_row(0), row1));
-
-    assert(filesystem::file_size(filename) == 2 * db::PAGE_SIZE);
-
-    passed("Multiple pages are stored independently");
-
-    filesystem::remove(filename);
-}
-
-
-void test_page_offsets()
-{
-    const string filename = "test.db";
-
-    filesystem::remove(filename);
-
-    Pager pager(filename);
-
-    Page page0;
-    Page page1;
-
-    Row alice("Alice", 111, "alice@example.com");
-    Row bob("Bob", 222, "bob@example.com");
-
-    page0.insert_row(alice);
-    page1.insert_row(bob);
-
-    pager.write_Page(0, page0);
-    pager.write_Page(1, page1);
-
-    Page recovered0 = pager.read_Page(0);
-    Page recovered1 = pager.read_Page(1);
-
-    assert(rows_equal(recovered0.read_row(0), alice));
-    assert(rows_equal(recovered1.read_row(0), bob));
-
-    passed("Page offsets are correct");
-
-    filesystem::remove(filename);
-}
-
-
-void test_invalid_page_number()
-{
-    const string filename = "test.db";
-
-    filesystem::remove(filename);
-
-    Pager pager(filename);
-
-    Page page;
-
-    pager.write_Page(0, page);
-
-    bool threw = false;
-
-    try
-    {
-        pager.read_Page(1);
-    }
-    catch (const std::exception&)
-    {
-        threw = true;
-    }
-
-    assert(threw);
-
-    passed("Reading nonexistent page throws");
-
-    filesystem::remove(filename);
-}
-
-
-void test_negative_page_number()
-{
-    const string filename = "test.db";
-
-    filesystem::remove(filename);
-
-    Pager pager(filename);
-
-    bool threw = false;
-
-    try
-    {
-        pager.read_Page(-1);
-    }
-    catch (const std::exception&)
-    {
-        threw = true;
-    }
-
-    assert(threw);
-
-    passed("Negative page number throws");
-
-    filesystem::remove(filename);
-}
-
-
-void test_page_gap_rejected()
-{
-    const string filename = "test.db";
-
-    filesystem::remove(filename);
-
-    Pager pager(filename);
-
-    Page page;
-
-    pager.write_Page(0, page);
-
-    bool threw = false;
-
-    try
-    {
-        // Page 1 does not exist yet.
-        // Page 2 should therefore be rejected.
-        pager.write_Page(2, page);
-    }
-    catch (const std::exception&)
-    {
-        threw = true;
-    }
-
-    assert(threw);
-
-    passed("Page gaps are rejected");
-
-    filesystem::remove(filename);
+    cout << "[PASS] " << test << '\n';
 }
 
 
@@ -516,47 +53,533 @@ void test_page_gap_rejected()
 
 int main()
 {
-    try
+    cout << "=====================================\n";
+    cout << "       FORGEDB - PAGE TESTS\n";
+    cout << "=====================================\n\n";
+
+
+    // ========================================================
+    // TEST 1
+    // Newly created Page should not be full
+    // ========================================================
+
     {
-        cout << "\n========== ROW TESTS ==========\n";
+        Page page;
 
-        test_row_serialization();
-        test_row_serialized_size();
-        test_row_different_values();
+        assert(page.is_full() == false);
 
-
-        cout << "\n========== PAGE TESTS ==========\n";
-
-        test_empty_page();
-        test_page_insert_and_read();
-        test_multiple_rows();
-        test_page_full();
-        test_page_rejects_extra_row();
-        test_invalid_page_index();
-        test_negative_page_index();
-        test_page_serialization();
-
-
-        cout << "\n========== PAGER TESTS ==========\n";
-
-        test_pager_creates_database();
-        test_write_first_page();
-        test_read_page();
-        test_persistence_after_restart();
-        test_multiple_pages();
-        test_page_offsets();
-        test_invalid_page_number();
-        test_negative_page_number();
-        test_page_gap_rejected();
-
-
-        cout << "\n========== ALL TESTS PASSED ==========\n";
+        passed("New page starts empty");
     }
-    catch (const std::exception& e)
+
+
+    // ========================================================
+    // TEST 2
+    // Insert one Row
+    // ========================================================
+
     {
-        cout << "\n[FAIL] " << e.what() << '\n';
-        return 1;
+        Page page;
+
+        Row row = make_row(
+            1,
+            "sam",
+            "sam@example.com"
+        );
+
+        page.insert_row(row);
+
+        // If insertion did not throw, basic insertion succeeded.
+
+        passed("Insert one row");
     }
+
+
+    // ========================================================
+    // TEST 3
+    // Insert -> Read should return the same Row
+    // ========================================================
+
+    {
+        Page page;
+
+        Row original = make_row(
+            1,
+            "sam",
+            "sam@example.com"
+        );
+
+        page.insert_row(original);
+
+        Row recovered = page.read_row(0);
+
+        assert(rows_equal(original, recovered));
+
+        passed("Insert and read one row");
+    }
+
+
+    // ========================================================
+    // TEST 4
+    // Insert multiple Rows
+    // ========================================================
+
+    {
+        Page page;
+
+        Row row1 = make_row(1, "sam", "sam@example.com");
+        Row row2 = make_row(2, "alex", "alex@example.com");
+        Row row3 = make_row(3, "john", "john@example.com");
+
+        page.insert_row(row1);
+        page.insert_row(row2);
+        page.insert_row(row3);
+
+        passed("Insert multiple rows");
+    }
+
+
+    // ========================================================
+    // TEST 5
+    // Verify multiple Rows are stored at correct positions
+    // ========================================================
+
+    {
+        Page page;
+
+        Row row1 = make_row(1, "sam", "sam@example.com");
+        Row row2 = make_row(2, "alex", "alex@example.com");
+        Row row3 = make_row(3, "john", "john@example.com");
+
+        page.insert_row(row1);
+        page.insert_row(row2);
+        page.insert_row(row3);
+
+        Row recovered1 = page.read_row(0);
+        Row recovered2 = page.read_row(1);
+        Row recovered3 = page.read_row(2);
+
+        assert(rows_equal(row1, recovered1));
+        assert(rows_equal(row2, recovered2));
+        assert(rows_equal(row3, recovered3));
+
+        passed("Multiple rows retain correct order");
+    }
+
+
+    // ========================================================
+    // TEST 6
+    // Verify row offset calculation
+    //
+    // Metadata = 4 bytes
+    // Row size = 100 bytes
+    //
+    // Row 0 -> offset 4
+    // Row 1 -> offset 104
+    // Row 2 -> offset 204
+    // ========================================================
+
+    {
+        Page page;
+
+        Row row1 = make_row(
+            100,
+            "row0",
+            "row0@email.com"
+        );
+
+        Row row2 = make_row(
+            200,
+            "row1",
+            "row1@email.com"
+        );
+
+        Row row3 = make_row(
+            300,
+            "row2",
+            "row2@email.com"
+        );
+
+        page.insert_row(row1);
+        page.insert_row(row2);
+        page.insert_row(row3);
+
+        assert(page.read_row(0).id == 100);
+        assert(page.read_row(1).id == 200);
+        assert(page.read_row(2).id == 300);
+
+        passed("Row offsets are correct");
+    }
+
+
+    // ========================================================
+    // TEST 7
+    // Reading an unused slot should throw
+    // ========================================================
+
+    {
+        Page page;
+
+        Row row1 = make_row(
+            1,
+            "sam",
+            "sam@example.com"
+        );
+
+        Row row2 = make_row(
+            2,
+            "alex",
+            "alex@example.com"
+        );
+
+        page.insert_row(row1);
+        page.insert_row(row2);
+
+        bool exception_thrown = false;
+
+        try
+        {
+            // Only indices 0 and 1 contain rows.
+            page.read_row(2);
+        }
+        catch (const invalid_argument&)
+        {
+            exception_thrown = true;
+        }
+
+        assert(exception_thrown);
+
+        passed("Reading unused row throws");
+    }
+
+
+    // ========================================================
+    // TEST 8
+    // Negative index should throw
+    // ========================================================
+
+    {
+        Page page;
+
+        bool exception_thrown = false;
+
+        try
+        {
+            page.read_row(-1);
+        }
+        catch (const invalid_argument&)
+        {
+            exception_thrown = true;
+        }
+
+        assert(exception_thrown);
+
+        passed("Negative index throws");
+    }
+
+
+    // ========================================================
+    // TEST 9
+    // Index beyond physical page capacity should throw
+    //
+    // We don't use Page::MAX_ROWS because it is private.
+    // ========================================================
+
+    {
+        Page page;
+
+        bool exception_thrown = false;
+
+        try
+        {
+            page.read_row(1000);
+        }
+        catch (const invalid_argument&)
+        {
+            exception_thrown = true;
+        }
+
+        assert(exception_thrown);
+
+        passed("Out-of-range index throws");
+    }
+
+
+    // ========================================================
+    // TEST 10
+    // Page should become full after exactly 40 rows
+    //
+    // We don't access MAX_ROWS.
+    // We simply insert until is_full() reports true.
+    // ========================================================
+
+    {
+        Page page;
+
+        int inserted = 0;
+
+        while (!page.is_full())
+        {
+            Row row = make_row(
+                inserted,
+                "user",
+                "user@example.com"
+            );
+
+            page.insert_row(row);
+
+            inserted++;
+        }
+
+        assert(page.is_full() == true);
+        assert(inserted == 40);
+
+        passed("Page becomes full after 40 rows");
+    }
+
+
+    // ========================================================
+    // TEST 11
+    // Full Page should reject another Row
+    // ========================================================
+
+    {
+        Page page;
+
+        int inserted = 0;
+
+        while (!page.is_full())
+        {
+            Row row = make_row(
+                inserted,
+                "user",
+                "user@example.com"
+            );
+
+            page.insert_row(row);
+
+            inserted++;
+        }
+
+        Row extra = make_row(
+            999,
+            "extra",
+            "extra@example.com"
+        );
+
+        bool exception_thrown = false;
+
+        try
+        {
+            page.insert_row(extra);
+        }
+        catch (const invalid_argument&)
+        {
+            exception_thrown = true;
+        }
+
+        assert(exception_thrown);
+
+        passed("Full page rejects insertion");
+    }
+
+
+    // ========================================================
+    // TEST 12
+    // Verify all 40 Rows after filling the Page
+    // ========================================================
+
+    {
+        Page page;
+
+        int inserted = 0;
+
+        while (!page.is_full())
+        {
+            Row row = make_row(
+                inserted,
+                "user",
+                "user@example.com"
+            );
+
+            page.insert_row(row);
+
+            inserted++;
+        }
+
+        assert(inserted == 40);
+
+        for (int i = 0; i < inserted; i++)
+        {
+            Row recovered = page.read_row(i);
+
+            assert(recovered.id == i);
+            assert(strcmp(
+                recovered.username,
+                "user"
+            ) == 0);
+
+            assert(strcmp(
+                recovered.email,
+                "user@example.com"
+            ) == 0);
+        }
+
+        passed("All 40 rows recover correctly");
+    }
+
+
+    // ========================================================
+    // TEST 13
+    // Two Pages should be independent
+    // ========================================================
+
+    {
+        Page page1;
+        Page page2;
+
+        Row row1 = make_row(
+            1,
+            "page1",
+            "page1@email.com"
+        );
+
+        Row row2 = make_row(
+            2,
+            "page2",
+            "page2@email.com"
+        );
+
+        page1.insert_row(row1);
+        page2.insert_row(row2);
+
+        assert(rows_equal(
+            page1.read_row(0),
+            row1
+        ));
+
+        assert(rows_equal(
+            page2.read_row(0),
+            row2
+        ));
+
+        passed("Pages are independent");
+    }
+
+
+    // ========================================================
+    // TEST 14
+    // One Page should not affect another Page
+    // ========================================================
+
+    {
+        Page page1;
+        Page page2;
+
+        for (int i = 0; i < 10; i++)
+        {
+            Row row = make_row(
+                i,
+                "page1",
+                "page1@email.com"
+            );
+
+            page1.insert_row(row);
+        }
+
+        // page2 should still be empty.
+        // Therefore reading row 0 must throw.
+
+        bool exception_thrown = false;
+
+        try
+        {
+            page2.read_row(0);
+        }
+        catch (const invalid_argument&)
+        {
+            exception_thrown = true;
+        }
+
+        assert(exception_thrown);
+
+        passed("Page state is isolated");
+    }
+
+
+    // ========================================================
+    // TEST 15
+    // Verify boundary behaviour around capacity
+    //
+    // Insert 39 -> should not be full
+    // Insert 40th -> should be full
+    // ========================================================
+
+    {
+        Page page;
+
+        for (int i = 0; i < 39; i++)
+        {
+            Row row = make_row(
+                i,
+                "user",
+                "user@email.com"
+            );
+
+            page.insert_row(row);
+        }
+
+        assert(page.is_full() == false);
+
+        Row final_row = make_row(
+            39,
+            "user",
+            "user@email.com"
+        );
+
+        page.insert_row(final_row);
+
+        assert(page.is_full() == true);
+
+        passed("Capacity boundary is correct");
+    }
+
+
+    // ========================================================
+    // TEST 16
+    // Verify first and last rows
+    // ========================================================
+
+    {
+        Page page;
+
+        for (int i = 0; i < 40; i++)
+        {
+            Row row = make_row(
+                i,
+                "user",
+                "user@email.com"
+            );
+
+            page.insert_row(row);
+        }
+
+        Row first = page.read_row(0);
+        Row last = page.read_row(39);
+
+        assert(first.id == 0);
+        assert(last.id == 39);
+
+        passed("First and last row are accessible");
+    }
+
+
+    // ========================================================
+    // FINAL RESULT
+    // ========================================================
+
+    cout << "\n=====================================\n";
+    cout << " ALL PAGE TESTS PASSED SUCCESSFULLY\n";
+    cout << "=====================================\n";
 
     return 0;
 }

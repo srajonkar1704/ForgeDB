@@ -2,15 +2,14 @@
 #include<cstdint>
 #include<cstddef>
 #include<string>
+#include "Constants.hpp"
 
 class Row
 {
     public:
-     static constexpr size_t NAME_SIZE =32;
-     static constexpr size_t EMAIL_SIZE =64;
-     static constexpr size_t ROW_SIZE = NAME_SIZE + sizeof(int32_t) + EMAIL_SIZE;     int32_t id;
-     char username[32];
-     char email[64];
+    int32_t id;
+     char username[db::NAME_SIZE];
+     char email[db::EMAIL_SIZE];
      
      Row();
      Row(const std:: string& username, int32_t id, const std:: string& email);
@@ -20,7 +19,7 @@ class Row
      
     static constexpr size_t SerializedSize()
     {
-        return ROW_SIZE;
+        return db::ROW_SIZE;
     }
 
 };
