@@ -1,0 +1,881 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+
+/* ============================================================
+   GLOBAL STYLES
+============================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #090d14;
+  color: #e5e7eb;
+  font-family: 'Inter', sans-serif;
+}
+
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   SIDEBAR
+============================================================ */
+
+.sidebar {
+  width: 245px;
+  flex-shrink: 0;
+  background: #0d131e;
+  border-right: 1px solid #202b3b;
+  padding: 25px 18px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 55px;
+  color: #60a5fa;
+}
+
+.brand h2 {
+  color: white;
+  font-size: 21px;
+}
+
+.brand span {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #8492a6;
+}
+
+.sidebar-section p,
+.database-list p {
+  color: #738197;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  margin-bottom: 17px;
+}
+
+.nav-item,
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 13px;
+  margin-bottom: 7px;
+
+  color: #9aa8bc;
+  font-size: 13px;
+  border-radius: 7px;
+}
+
+.nav-item.active {
+  background: #17263a;
+  color: #60a5fa;
+}
+
+.database-list {
+  margin-top: 45px;
+}
+
+.file-item {
+  font-size: 11px;
+  padding: 9px 2px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #9aa8bc;
+
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #22c55e;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+
+/* ============================================================
+   MAIN CONTENT
+============================================================ */
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 30px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.topbar h2 {
+  font-size: 23px;
+}
+
+.topbar span {
+  font-size: 12px;
+  color: #8794a8;
+}
+
+.engine-status {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: #4ade80;
+  font-size: 11px;
+}
+
+
+/* ============================================================
+   COMMON SECTIONS
+============================================================ */
+
+.editor-section,
+.pipeline-section,
+.storage-section,
+.panel,
+.tokenizer-container,
+.dataflow-section {
+
+  background: #111a28;
+  border: 1px solid #253248;
+  border-radius: 11px;
+  padding: 20px;
+  margin-bottom: 22px;
+
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-heading > div {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  color: #60a5fa;
+}
+
+.section-heading h3 {
+  color: #dce5f2;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.section-heading > span {
+  font-size: 10px;
+  color: #8794a8;
+}
+
+
+/* ============================================================
+   SQL EDITOR
+============================================================ */
+
+textarea {
+  width: 100%;
+  height: 105px;
+
+  resize: vertical;
+
+  background: #090f19;
+  border: 1px solid #29374b;
+  border-radius: 7px;
+
+  padding: 17px;
+
+  color: #7dd3fc;
+
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+
+  outline: none;
+}
+
+textarea:focus {
+  border-color: #3b82f6;
+}
+
+.editor-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 15px;
+
+  font-size: 11px;
+  color: #8794a8;
+}
+
+.editor-footer button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding: 11px 17px;
+
+  background: #2563eb;
+  border: none;
+  border-radius: 6px;
+
+  color: white;
+  font-weight: 700;
+  font-size: 11px;
+
+  transition: background 0.2s;
+}
+
+.editor-footer button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.editor-footer button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   TOKENIZER
+============================================================ */
+
+.tokenizer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.tokenizer-header > div {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #60a5fa;
+}
+
+.tokenizer-header h3 {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #dce5f2;
+}
+
+.tokenizer-header > span {
+  color: #60a5fa;
+  font-size: 10px;
+}
+
+.tokenizer-input {
+  background: #090f19;
+  border: 1px solid #29374b;
+
+  padding: 15px;
+  border-radius: 7px;
+
+  margin-bottom: 20px;
+}
+
+.tokenizer-input span {
+  display: block;
+  font-size: 9px;
+  color: #8291a8;
+  margin-bottom: 10px;
+}
+
+.tokenizer-input code {
+  color: #7dd3fc;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.token-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-height: 90px;
+}
+
+.token-card {
+  background: #0b1524;
+  border: 1px solid #34445c;
+  border-radius: 7px;
+
+  padding: 13px;
+  min-width: 110px;
+
+  text-align: center;
+}
+
+.token-index {
+  display: block;
+  color: #64748b;
+  font-size: 8px;
+  margin-bottom: 9px;
+}
+
+.token-card h4 {
+  color: #7dd3fc;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  margin-bottom: 9px;
+}
+
+.token-type {
+  color: #60a5fa;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+}
+
+.tokenizer-success {
+  color: #4ade80;
+  font-size: 11px;
+  margin-top: 18px;
+}
+
+
+/* ============================================================
+   QUERY EXECUTION PIPELINE
+============================================================ */
+
+.execution-pipeline {
+  padding: 20px 5px;
+  overflow-x: auto;
+}
+
+.pipeline-track {
+  display: flex;
+  align-items: center;
+  min-width: 950px;
+}
+
+.pipeline-step {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.pipeline-card {
+  position: relative;
+
+  min-width: 105px;
+  max-width: 130px;
+  min-height: 145px;
+
+  padding: 15px 9px;
+
+  background: #0b1320;
+  border: 1px solid #29374b;
+  border-radius: 9px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  color: #64748b;
+  gap: 10px;
+
+  overflow: hidden;
+}
+
+.pipeline-card.active {
+  color: #60a5fa;
+  border-color: #3b82f6;
+  background: #142b4b;
+  box-shadow: 0 0 25px #2563eb40;
+}
+
+.pipeline-card.completed {
+  color: #4ade80;
+  border-color: #16a34a;
+}
+
+.pipeline-card h4 {
+  font-size: 10px;
+}
+
+.pipeline-card p {
+  font-size: 9px;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+.processing-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
+  height: 3px;
+  background: #60a5fa;
+}
+
+.pipeline-connector {
+  position: relative;
+
+  flex: 1;
+  min-width: 20px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  color: #64748b;
+}
+
+.connector-pulse {
+  position: absolute;
+  inset: 0;
+
+  background: #2563eb;
+  height: 2px;
+
+  transform-origin: left;
+}
+
+.pipeline-connector span {
+  position: relative;
+  z-index: 1;
+
+  background: #111a28;
+  padding: 0 4px;
+}
+
+
+/* ============================================================
+   DATA FLOW VISUALIZATION
+============================================================ */
+
+.dataflow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.dataflow-header > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #60a5fa;
+}
+
+.dataflow-header h3 {
+  color: #dce5f2;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.dataflow-header > span {
+  font-size: 9px;
+  color: #8291a8;
+}
+
+.dataflow-track {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  overflow-x: auto;
+  padding: 15px 5px;
+}
+
+.dataflow-item {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 120px;
+}
+
+.dataflow-node {
+  position: relative;
+
+  flex: 1;
+  min-height: 145px;
+
+  padding: 17px 8px;
+
+  background: #0b1320;
+  border: 1px solid #29374b;
+  border-radius: 9px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+
+  color: #64748b;
+  gap: 10px;
+
+  overflow: hidden;
+}
+
+.dataflow-node.active {
+  color: #60a5fa;
+  background: #142b4b;
+  border-color: #3b82f6;
+  box-shadow: 0 0 25px #2563eb40;
+}
+
+.dataflow-node.completed {
+  color: #4ade80;
+  border-color: #16a34a;
+  background: #10251f;
+}
+
+.dataflow-node h4 {
+  font-size: 10px;
+}
+
+.dataflow-node p {
+  color: #94a3b8;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.dataflow-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
+  height: 3px;
+  background: #60a5fa;
+}
+
+.dataflow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+  padding: 0 8px;
+
+  color: #64748b;
+}
+
+.data-packet {
+  position: absolute;
+
+  color: #60a5fa;
+  font-size: 12px;
+
+  z-index: 2;
+
+  left: 0;
+  top: -12px;
+}
+
+.dataflow-footer {
+  display: flex;
+  justify-content: space-between;
+
+  border-top: 1px solid #253248;
+
+  padding-top: 15px;
+  margin-top: 15px;
+
+  color: #8291a8;
+  font-size: 10px;
+}
+
+
+/* ============================================================
+   STORAGE ENGINE
+============================================================ */
+
+.storage-flow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.storage-node {
+  flex: 1;
+
+  background: #0b1320;
+  border: 1px solid #29374b;
+  border-radius: 9px;
+
+  padding: 20px 8px;
+
+  text-align: center;
+  color: #8291a8;
+
+  transition: 0.3s;
+}
+
+.storage-node.active {
+  border-color: #3b82f6;
+  background: #142b4b;
+  color: #60a5fa;
+  box-shadow: 0 0 20px #2563eb30;
+}
+
+.storage-node svg {
+  width: 23px;
+  height: 23px;
+}
+
+.storage-node h4 {
+  font-size: 11px;
+  margin: 10px 0 5px;
+}
+
+.storage-node span {
+  font-size: 9px;
+}
+
+.flow-arrow {
+  color: #53647c;
+  font-size: 20px;
+}
+
+
+/* ============================================================
+   BOTTOM GRID
+============================================================ */
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+}
+
+
+/* ============================================================
+   PAGE VISUALIZER
+============================================================ */
+
+.page-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.page-info span {
+  color: #8291a8;
+  font-size: 9px;
+}
+
+.page-info h2 {
+  font-size: 15px;
+  margin-top: 6px;
+}
+
+.page-slots {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 7px;
+}
+
+.page-slot {
+  height: 31px;
+
+  background: #182536;
+  border: 1px solid #30415a;
+  border-radius: 4px;
+
+  display: grid;
+  place-items: center;
+
+  font-size: 9px;
+  color: #dbeafe;
+}
+
+.page-slot.occupied {
+  background: #1e40af;
+  border-color: #60a5fa;
+}
+
+.page-caption {
+  color: #8794a8;
+  font-size: 10px;
+  margin-top: 17px;
+}
+
+
+/* ============================================================
+   EXECUTION OUTPUT
+============================================================ */
+
+.output {
+  background: #090f19;
+  border-radius: 7px;
+
+  min-height: 170px;
+  padding: 18px;
+
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+
+  color: #8794a8;
+}
+
+.success {
+  color: #4ade80;
+}
+
+.error {
+  color: #f87171;
+}
+
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+footer {
+  display: flex;
+  justify-content: space-between;
+
+  color: #64748b;
+  font-size: 10px;
+
+  padding: 10px 0;
+}
+
+
+/* ============================================================
+   RESPONSIVE DESIGN
+============================================================ */
+
+@media (max-width: 1100px) {
+
+  .sidebar {
+    width: 200px;
+  }
+
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pipeline {
+    flex-wrap: wrap;
+  }
+
+}
+
+@media (max-width: 900px) {
+
+  .main-content {
+    padding: 20px;
+  }
+
+  .storage-flow {
+    flex-wrap: wrap;
+  }
+
+  .dataflow-track {
+    justify-content: flex-start;
+  }
+
+  .dataflow-item {
+    min-width: 150px;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    padding: 15px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .topbar h2 {
+    font-size: 19px;
+  }
+
+  .storage-flow {
+    flex-direction: column;
+  }
+
+  .storage-node {
+    width: 100%;
+  }
+
+  .flow-arrow {
+    transform: rotate(90deg);
+  }
+
+  .dataflow-header > span {
+    display: none;
+  }
+
+  footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+}
+.terminal-output {
+    margin-top: 15px;
+    padding: 15px;
+    background: #101820;
+    border: 1px solid #263746;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.terminal-output pre {
+    color: #d5e5ef;
+    font-family: "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    margin: 0;
+}
+
+.terminal-error {
+    margin-top: 12px;
+    color: #ff7777;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-family: monospace;
+}
